@@ -2,7 +2,7 @@
 # terraform.tfvars is gitignored — never commit the real file.
 
 proxmox_endpoint  = "https://PROXMOX_HOST:8006"
-proxmox_api_token = "heimdall@pve!terraform=<YOUR_TOKEN_SECRET>"
+proxmox_api_token = "root@pam!terraform=<YOUR_TOKEN_SECRET>"
 proxmox_node      = "yggdrasil"
 datastore_id      = "local-zfs"
 iso_file_id       = "local:iso/OPNsense-26.1.6-dvd-amd64.iso"

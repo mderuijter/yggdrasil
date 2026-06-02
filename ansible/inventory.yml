@@ -1,0 +1,8 @@
+all:
+  hosts:
+    proxmox:
+      ansible_host: PROXMOX_HOST
+      ansible_user: root
+    media:
+      ansible_host: ALFHEIM_HOST
+      ansible_user: root
