@@ -45,6 +45,10 @@ resource "proxmox_virtual_environment_vm" "asgard" {
     enabled = false
   }
 
+  vga {
+    type = "vmware"
+  }
+
   operating_system {
     type = "other"
   }
