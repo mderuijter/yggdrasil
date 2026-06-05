@@ -1,0 +1,7 @@
+# Copy to terraform.tfvars and fill in secrets — never commit terraform.tfvars
+# root@pam required — Proxmox only allows literal root to set hostpci for non-mapped devices
+proxmox_endpoint = "https://PROXMOX_HOST:8006"
+proxmox_password = "<ROOT_PAM_PASSWORD>"
+proxmox_node     = "yggdrasil"
+datastore_id     = "local-zfs"
+ssh_public_key   = "<YOUR_SSH_PUBLIC_KEY>"
