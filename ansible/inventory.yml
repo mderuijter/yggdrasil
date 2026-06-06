@@ -3,6 +3,10 @@ all:
     proxmox:
       ansible_host: PROXMOX_HOST
       ansible_user: root
-    media:
+    alfheim:
       ansible_host: ALFHEIM_HOST
       ansible_user: root
+    muspelheim:
+      ansible_host: MUSPELHEIM_IP
+      ansible_user: ubuntu
+      ansible_ssh_common_args: '-J root@ASGARD_HOST'
