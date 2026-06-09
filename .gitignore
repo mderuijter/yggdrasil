@@ -8,3 +8,4 @@ __pycache__/
 CLAUDE.md
 **/CLAUDE.md
 **/secrets.yaml
+**/secrets.enc.yaml

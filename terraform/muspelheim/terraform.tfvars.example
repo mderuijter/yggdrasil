@@ -1,6 +1,6 @@
 # Non-sensitive config — copy to terraform.tfvars and fill in your values.
-# Secrets (proxmox_password, ssh_public_key) live in secrets.enc.yaml — edit with:
-#   sops terraform/muspelheim/secrets.enc.yaml
+# Secrets (proxmox_password, ssh_public_key) live in secrets.enc.yaml (gitignored).
+# Create with: sops terraform/muspelheim/secrets.enc.yaml
 proxmox_endpoint = "https://<PROXMOX_IP>:8006"
 proxmox_node     = "yggdrasil"
 datastore_id     = "local-zfs"

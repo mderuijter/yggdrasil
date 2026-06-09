@@ -1,6 +1,6 @@
-# Non-sensitive config only — copy to terraform.tfvars and adjust if needed.
-# Secrets (proxmox_api_token) live in secrets.enc.yaml — edit with:
-#   sops terraform/asgard/secrets.enc.yaml
+# Non-sensitive config — copy to terraform.tfvars and fill in your values.
+# Secrets (proxmox_api_token) live in secrets.enc.yaml (gitignored).
+# Create with: sops terraform/asgard/secrets.enc.yaml
 proxmox_endpoint = "https://<PROXMOX_IP>:8006"
 proxmox_node     = "yggdrasil"
 datastore_id     = "local-zfs"
