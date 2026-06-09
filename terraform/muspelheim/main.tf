@@ -6,13 +6,21 @@ terraform {
       source  = "bpg/proxmox"
       version = "~> 0.60"
     }
+    sops = {
+      source  = "carlpett/sops"
+      version = "~> 1.0"
+    }
   }
+}
+
+data "sops_file" "secrets" {
+  source_file = "${path.module}/secrets.enc.yaml"
 }
 
 provider "proxmox" {
   endpoint = var.proxmox_endpoint
   username = "root@pam"
-  password = var.proxmox_password
+  password = data.sops_file.secrets.data["proxmox_password"]
   insecure = true
 
   ssh {
@@ -112,7 +120,7 @@ resource "proxmox_virtual_environment_vm" "muspelheim" {
     }
 
     user_account {
-      keys     = [var.ssh_public_key]
+      keys     = [data.sops_file.secrets.data["ssh_public_key"]]
       username = "ubuntu"
     }
   }

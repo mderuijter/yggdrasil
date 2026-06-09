@@ -4,3 +4,6 @@
 *.tfvars
 ansible/vault*
 __pycache__/
+CLAUDE.md
+**/CLAUDE.md
+**/secrets.yaml

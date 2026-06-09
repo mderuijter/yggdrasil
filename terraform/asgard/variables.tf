@@ -4,12 +4,6 @@ variable "proxmox_endpoint" {
   default     = "https://PROXMOX_HOST:8006"
 }
 
-variable "proxmox_api_token" {
-  description = "Proxmox API token (format: user@realm!token_id=secret)"
-  type        = string
-  sensitive   = true
-}
-
 variable "proxmox_node" {
   description = "Proxmox node name"
   type        = string

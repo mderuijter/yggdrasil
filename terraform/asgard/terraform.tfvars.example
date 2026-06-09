@@ -1,8 +1,7 @@
-# Copy this file to terraform.tfvars and fill in the API token secret.
-# terraform.tfvars is gitignored — never commit the real file.
-
-proxmox_endpoint  = "https://PROXMOX_HOST:8006"
-proxmox_api_token = "root@pam!terraform=<YOUR_TOKEN_SECRET>"
-proxmox_node      = "yggdrasil"
-datastore_id      = "local-zfs"
-iso_file_id       = "local:iso/OPNsense-26.1.6-dvd-amd64.iso"
+# Non-sensitive config only — copy to terraform.tfvars and adjust if needed.
+# Secrets (proxmox_api_token) live in secrets.enc.yaml — edit with:
+#   sops terraform/asgard/secrets.enc.yaml
+proxmox_endpoint = "https://<PROXMOX_IP>:8006"
+proxmox_node     = "yggdrasil"
+datastore_id     = "local-zfs"
+iso_file_id      = "local:iso/OPNsense-<VERSION>-dvd-amd64.iso"

@@ -4,12 +4,6 @@ variable "proxmox_endpoint" {
   default     = "https://PROXMOX_HOST:8006"
 }
 
-variable "proxmox_password" {
-  description = "root@pam password — required for hostpci passthrough (Proxmox root-only restriction)"
-  type        = string
-  sensitive   = true
-}
-
 variable "proxmox_node" {
   description = "Proxmox node name"
   type        = string
@@ -22,7 +16,3 @@ variable "datastore_id" {
   default     = "local-zfs"
 }
 
-variable "ssh_public_key" {
-  description = "SSH public key for the ubuntu user on Muspelheim"
-  type        = string
-}
