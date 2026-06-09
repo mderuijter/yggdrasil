@@ -1,7 +1,6 @@
 variable "proxmox_endpoint" {
-  description = "Proxmox API endpoint URL"
+  description = "Proxmox API endpoint URL (e.g. https://192.168.x.x:8006)"
   type        = string
-  default     = "https://PROXMOX_HOST:8006"
 }
 
 variable "proxmox_node" {

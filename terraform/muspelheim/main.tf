@@ -39,7 +39,7 @@ resource "proxmox_download_file" "ubuntu_2404_cloud" {
 
 resource "proxmox_virtual_environment_vm" "muspelheim" {
   name        = "muspelheim"
-  description = "AI VM — Ollama + Open WebUI, GPU PCIe passthrough"
+  description = "AI VM — Ollama + Open WebUI with GPU passthrough"
   node_name   = var.proxmox_node
   vm_id       = var.vm_id
   tags        = ["ai", "homelab", "yggdrasil"]
@@ -88,21 +88,20 @@ resource "proxmox_virtual_environment_vm" "muspelheim" {
   }
 
   # GPU PCIe passthrough — both GPU and HDMI audio functions passed as a group.
-  # Both functions passed as a group; x_vga required for display init
   # xvga intentionally omitted — GPU is for CUDA compute only, not display.
   # OVMF hangs initialising the GPU GOP when xvga=true on a headless VM.
   hostpci {
     device = "hostpci0"
-    id     = "GPU_PCI_ID"
+    id     = var.gpu_pci_id
     pcie   = true
     rombar = true
   }
 
-  # Lab VLAN (AI/Lab — LAB_VLAN_SUBNET) — internal trunk, routed by OPNsense
+  # Internal VLAN trunk — routed by OPNsense
   network_device {
     bridge  = "vmbr1"
     model   = "virtio"
-    vlan_id = 0
+    vlan_id = var.vm_vlan_id
   }
 
   initialization {
@@ -110,13 +109,13 @@ resource "proxmox_virtual_environment_vm" "muspelheim" {
 
     ip_config {
       ipv4 {
-        address = "MUSPELHEIM_IP/24"
-        gateway = "MUSPELHEIM_GATEWAY"
+        address = var.vm_ip_cidr
+        gateway = var.vm_gateway
       }
     }
 
     dns {
-      servers = ["MUSPELHEIM_GATEWAY"]
+      servers = [var.vm_gateway]
     }
 
     user_account {

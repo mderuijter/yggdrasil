@@ -1,6 +1,11 @@
-# Non-sensitive config only — copy to terraform.tfvars and adjust if needed.
+# Non-sensitive config — copy to terraform.tfvars and fill in your values.
 # Secrets (proxmox_password, ssh_public_key) live in secrets.enc.yaml — edit with:
 #   sops terraform/muspelheim/secrets.enc.yaml
 proxmox_endpoint = "https://<PROXMOX_IP>:8006"
 proxmox_node     = "yggdrasil"
 datastore_id     = "local-zfs"
+
+vm_ip_cidr = "10.x.x.x/24"
+vm_gateway = "10.x.x.1"
+vm_vlan_id = 0  # set to your lab VLAN ID
+gpu_pci_id = "0000:XX:00"

@@ -1,0 +1,9 @@
+all:
+  hosts:
+    proxmox:
+      ansible_host: <PROXMOX_IP>
+      ansible_user: root
+    muspelheim:
+      ansible_host: <MUSPELHEIM_IP>
+      ansible_user: ubuntu
+      ansible_ssh_common_args: '-J root@<JUMP_HOST_IP>'

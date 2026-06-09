@@ -4,6 +4,6 @@ output "muspelheim_vmid" {
 }
 
 output "muspelheim_ip" {
-  description = "Static IP on lab VLAN"
-  value       = "MUSPELHEIM_IP"
+  description = "Static IP address"
+  value       = split("/", var.vm_ip_cidr)[0]
 }

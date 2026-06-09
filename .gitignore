@@ -3,6 +3,7 @@
 *.tfstate.*
 *.tfvars
 ansible/vault*
+ansible/inventory.yml
 __pycache__/
 CLAUDE.md
 **/CLAUDE.md
