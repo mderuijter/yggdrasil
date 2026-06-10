@@ -12,7 +12,7 @@ Personal homelab infrastructure — built as a portfolio demonstrating senior Ja
 | **AI platform** | GPU passthrough, Ollama, Open WebUI — full local AI inference stack |
 | **Kubernetes / CKAD** | K3s cluster (Midgard) with ArgoCD GitOps + Helm delivery *(in progress)* |
 | **Event streaming** | Kafka + PostgreSQL (Nidavellir) *(in progress)* |
-| **Security posture** | OWASP Top 10 compliance, zero hardcoded credentials, gitignored internal topology |
+| **Security posture** | OWASP Top 10 compliance |
 
 ## Realms
 
