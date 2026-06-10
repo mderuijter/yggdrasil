@@ -35,3 +35,8 @@ variable "gpu_pci_id" {
   type        = string
 }
 
+variable "vm_id" {
+  description = "Proxmox VM ID for the Muspelheim AI VM"
+  type        = number
+}
+

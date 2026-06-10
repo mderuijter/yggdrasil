@@ -4,6 +4,7 @@
 *.tfvars
 ansible/vault*
 ansible/inventory.yml
+.sops.yaml
 __pycache__/
 CLAUDE.md
 **/CLAUDE.md

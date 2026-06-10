@@ -5,3 +5,4 @@ proxmox_endpoint = "https://<PROXMOX_IP>:8006"
 proxmox_node     = "yggdrasil"
 datastore_id     = "local-zfs"
 iso_file_id      = "local:iso/OPNsense-<VERSION>-dvd-amd64.iso"
+vm_id            = 0  # Proxmox VM ID

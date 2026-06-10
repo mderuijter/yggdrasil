@@ -9,3 +9,4 @@ vm_ip_cidr = "10.x.x.x/24"
 vm_gateway = "10.x.x.1"
 vm_vlan_id = 0  # set to your lab VLAN ID
 gpu_pci_id = "0000:XX:00"
+vm_id      = 0  # Proxmox VM ID

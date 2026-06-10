@@ -18,5 +18,9 @@ variable "datastore_id" {
 variable "iso_file_id" {
   description = "Proxmox file ID for the OPNsense installer ISO"
   type        = string
-  # no default — set iso_file_id in terraform.tfvars
+}
+
+variable "vm_id" {
+  description = "Proxmox VM ID for the Asgard OPNsense VM"
+  type        = number
 }
