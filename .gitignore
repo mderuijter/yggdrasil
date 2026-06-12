@@ -8,5 +8,6 @@ ansible/inventory.yml
 __pycache__/
 CLAUDE.md
 **/CLAUDE.md
+alfheim/
 **/secrets.yaml
 **/secrets.enc.yaml
