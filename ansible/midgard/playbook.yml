@@ -1,0 +1,91 @@
+---
+- name: Set up Midgard K3s VM
+  hosts: midgard
+  become: true
+  gather_facts: true
+  vars:
+    k3s_mount: /var/lib/rancher
+    nvme_device: /dev/vdb
+    nvme_partition: /dev/vdb1
+
+  tasks:
+    # --- Prerequisites ---
+    - name: Install prerequisites
+      apt:
+        name:
+          - curl
+          - ca-certificates
+          - qemu-guest-agent
+          - parted
+        state: present
+        update_cache: true
+
+    - name: Enable and start QEMU guest agent
+      systemd:
+        name: qemu-guest-agent
+        enabled: true
+        state: started
+
+    # --- NVMe disk setup ---
+    - name: Create partition on NVMe disk
+      community.general.parted:
+        device: "{{ nvme_device }}"
+        number: 1
+        state: present
+        fs_type: ext4
+
+    - name: Create ext4 filesystem on NVMe partition
+      community.general.filesystem:
+        fstype: ext4
+        dev: "{{ nvme_partition }}"
+        force: false
+
+    - name: Get NVMe partition UUID
+      command: blkid -s UUID -o value {{ nvme_partition }}
+      register: nvme_uuid
+      changed_when: false
+
+    - name: Create K3s data mount point
+      file:
+        path: "{{ k3s_mount }}"
+        state: directory
+        mode: "0755"
+
+    - name: Mount NVMe partition at K3s data directory
+      ansible.posix.mount:
+        path: "{{ k3s_mount }}"
+        src: "UUID={{ nvme_uuid.stdout }}"
+        fstype: ext4
+        opts: defaults,noatime
+        state: mounted
+
+    # --- K3s ---
+    - name: Install K3s with embedded etcd
+      shell: |
+        curl -sfL https://get.k3s.io | \
+          INSTALL_K3S_EXEC="server --cluster-init --write-kubeconfig-mode 644" sh -
+      args:
+        creates: /usr/local/bin/k3s
+
+    - name: Wait for K3s node to become ready
+      command: k3s kubectl get nodes
+      register: k3s_nodes
+      until: k3s_nodes.rc == 0
+      retries: 15
+      delay: 10
+      changed_when: false
+
+    - name: Copy kubeconfig to ubuntu user home
+      copy:
+        src: /etc/rancher/k3s/k3s.yaml
+        dest: /home/ubuntu/.kube/config
+        owner: ubuntu
+        group: ubuntu
+        mode: "0600"
+        remote_src: true
+
+  handlers:
+    - name: Restart K3s
+      systemd:
+        name: k3s
+        state: restarted

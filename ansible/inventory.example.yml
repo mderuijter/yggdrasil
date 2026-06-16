@@ -7,3 +7,7 @@ all:
       ansible_host: <MUSPELHEIM_IP>
       ansible_user: ubuntu
       ansible_ssh_common_args: '-J root@<JUMP_HOST_IP>'
+    midgard:
+      ansible_host: <MIDGARD_IP>
+      ansible_user: ubuntu
+      ansible_ssh_common_args: '-J root@<JUMP_HOST_IP>'
