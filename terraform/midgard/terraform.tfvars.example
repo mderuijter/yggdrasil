@@ -1,0 +1,12 @@
+# Non-sensitive config — copy to terraform.tfvars and fill in your values.
+# Secrets (proxmox_password, ssh_public_key) live in secrets.enc.yaml (gitignored).
+# Create with: sops terraform/midgard/secrets.enc.yaml
+proxmox_endpoint = "https://<PROXMOX_IP>:8006"
+proxmox_node     = "yggdrasil"
+datastore_id     = "local-zfs"
+
+vm_id      = 0    # Proxmox VM ID
+vm_ip_cidr = "10.x.x.x/24"
+vm_gateway = "10.x.x.1"
+vm_vlan_id = 0    # set to your lab VLAN ID
+nvme_disk_path = "/dev/disk/by-id/nvme-INTEL_SSDPEKNW512G8_<serial>"  # stable by-id path on Proxmox host
