@@ -75,6 +75,14 @@
       delay: 10
       changed_when: false
 
+    - name: Create .kube directory for ubuntu user
+      file:
+        path: /home/ubuntu/.kube
+        state: directory
+        owner: ubuntu
+        group: ubuntu
+        mode: "0700"
+
     - name: Copy kubeconfig to ubuntu user home
       copy:
         src: /etc/rancher/k3s/k3s.yaml
