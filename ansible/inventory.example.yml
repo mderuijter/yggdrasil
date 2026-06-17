@@ -11,3 +11,7 @@ all:
       ansible_host: <MIDGARD_IP>
       ansible_user: ubuntu
       ansible_ssh_common_args: '-J root@<JUMP_HOST_IP>'
+    nidavellir:
+      ansible_host: <NIDAVELLIR_IP>
+      ansible_user: root
+      ansible_ssh_common_args: '-J root@<JUMP_HOST_IP>'

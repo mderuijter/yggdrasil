@@ -1,0 +1,18 @@
+# Non-sensitive config — copy to terraform.tfvars and fill in your values.
+# Secrets (proxmox_api_token, ssh_public_key) live in secrets.enc.yaml (gitignored).
+# Create with: sops terraform/nidavellir/secrets.enc.yaml
+proxmox_endpoint = "https://<PROXMOX_IP>:8006"
+proxmox_node     = "yggdrasil"
+datastore_id     = "local-zfs"
+
+vm_id      = 0    # Proxmox container ID
+vm_ip_cidr = "10.x.x.x/24"
+vm_gateway = "10.x.x.1"
+vm_vlan_id = 0    # set to your lab VLAN ID
+
+# Proxmox standard LXC template — check http://download.proxmox.com/images/system/ for latest version
+lxc_template_url = "http://download.proxmox.com/images/system/ubuntu-24.04-standard_24.04-2_amd64.tar.zst"
+
+cpu_cores    = 2
+memory_mb    = 4096
+disk_size_gb = 32

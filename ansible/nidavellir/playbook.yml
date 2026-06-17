@@ -1,0 +1,165 @@
+---
+- name: Set up Nidavellir — Kafka + PostgreSQL
+  hosts: nidavellir
+  become: true
+  gather_facts: true
+  vars:
+    kafka_version: "3.9.0"
+    kafka_scala_version: "2.13"
+    kafka_install_dir: /opt/kafka
+    kafka_data_dir: /var/lib/kafka/data
+    kafka_user: kafka
+    kafka_log_retention_hours: 168
+    postgres_version: "16"
+    postgres_user: portfolio
+    postgres_db: portfolio
+  vars_files:
+    - "../vault-nidavellir.yml"
+
+  tasks:
+    # --- Prerequisites ---
+    - name: Install prerequisites
+      apt:
+        name:
+          - curl
+          - ca-certificates
+          - openjdk-21-jre-headless
+          - acl
+          - postgresql
+          - python3-psycopg2
+        state: present
+        update_cache: true
+
+    # --- Kafka user and directories ---
+    - name: Create kafka system user
+      user:
+        name: "{{ kafka_user }}"
+        system: true
+        shell: /usr/sbin/nologin
+        home: "{{ kafka_install_dir }}"
+        create_home: false
+
+    - name: Create Kafka data directory
+      file:
+        path: "{{ kafka_data_dir }}"
+        state: directory
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+        mode: "0750"
+
+    # --- Kafka binary ---
+    - name: Download Kafka binary
+      get_url:
+        url: "https://archive.apache.org/dist/kafka/{{ kafka_version }}/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        dest: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        mode: "0644"
+
+    - name: Extract Kafka
+      unarchive:
+        src: "/tmp/kafka_{{ kafka_scala_version }}-{{ kafka_version }}.tgz"
+        dest: /opt
+        remote_src: true
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+        creates: "/opt/kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
+
+    - name: Symlink Kafka to {{ kafka_install_dir }}
+      file:
+        src: "/opt/kafka_{{ kafka_scala_version }}-{{ kafka_version }}"
+        dest: "{{ kafka_install_dir }}"
+        state: link
+        force: true
+
+    # --- Kafka KRaft config ---
+    - name: Deploy Kafka server.properties
+      template:
+        src: kafka-server.properties.j2
+        dest: "{{ kafka_install_dir }}/config/kraft/server.properties"
+        owner: "{{ kafka_user }}"
+        group: "{{ kafka_user }}"
+        mode: "0644"
+      notify: Restart Kafka
+
+    - name: Check if Kafka storage is already formatted
+      stat:
+        path: "{{ kafka_data_dir }}/meta.properties"
+      register: kafka_meta
+
+    - name: Generate Kafka cluster UUID
+      command: "{{ kafka_install_dir }}/bin/kafka-storage.sh random-uuid"
+      register: kafka_cluster_uuid
+      become_user: "{{ kafka_user }}"
+      when: not kafka_meta.stat.exists
+
+    - name: Format Kafka KRaft storage
+      command: >
+        {{ kafka_install_dir }}/bin/kafka-storage.sh format
+        --config {{ kafka_install_dir }}/config/kraft/server.properties
+        --cluster-id {{ kafka_cluster_uuid.stdout }}
+      become_user: "{{ kafka_user }}"
+      when: not kafka_meta.stat.exists
+
+    # --- Kafka systemd service ---
+    - name: Deploy Kafka systemd service
+      template:
+        src: kafka.service.j2
+        dest: /etc/systemd/system/kafka.service
+        mode: "0644"
+      notify:
+        - Reload systemd
+        - Restart Kafka
+
+    - name: Enable and start Kafka
+      systemd:
+        name: kafka
+        enabled: true
+        state: started
+        daemon_reload: true
+
+    # --- PostgreSQL ---
+    - name: Configure PostgreSQL listen_addresses
+      lineinfile:
+        path: "/etc/postgresql/{{ postgres_version }}/main/postgresql.conf"
+        regexp: "^#?listen_addresses"
+        line: "listen_addresses = '*'"
+      notify: Restart PostgreSQL
+
+    - name: Allow portfolio user from VLAN 20 subnet
+      lineinfile:
+        path: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
+        line: "host    {{ postgres_db }}    {{ postgres_user }}    10.10.20.0/24    scram-sha-256"
+        insertafter: "# IPv4 local connections:"
+      notify: Restart PostgreSQL
+
+    - name: Flush handlers before creating PostgreSQL objects
+      meta: flush_handlers
+
+    - name: Create PostgreSQL role
+      become_user: postgres
+      community.postgresql.postgresql_user:
+        name: "{{ postgres_user }}"
+        password: "{{ vault_postgres_password }}"
+        role_attr_flags: NOSUPERUSER,NOCREATEDB,NOCREATEROLE
+        state: present
+
+    - name: Create PostgreSQL database
+      become_user: postgres
+      community.postgresql.postgresql_db:
+        name: "{{ postgres_db }}"
+        owner: "{{ postgres_user }}"
+        state: present
+
+  handlers:
+    - name: Reload systemd
+      systemd:
+        daemon_reload: true
+
+    - name: Restart Kafka
+      systemd:
+        name: kafka
+        state: restarted
+
+    - name: Restart PostgreSQL
+      systemd:
+        name: postgresql
+        state: restarted
