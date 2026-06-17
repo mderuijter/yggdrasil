@@ -124,10 +124,10 @@
         line: "listen_addresses = '*'"
       notify: Restart PostgreSQL
 
-    - name: Allow portfolio user from VLAN 20 subnet
+    - name: Allow portfolio user from lab subnet
       lineinfile:
         path: "/etc/postgresql/{{ postgres_version }}/main/pg_hba.conf"
-        line: "host    {{ postgres_db }}    {{ postgres_user }}    10.10.20.0/24    scram-sha-256"
+        line: "host    {{ postgres_db }}    {{ postgres_user }}    {{ vault_postgres_client_subnet }}    scram-sha-256"
         insertafter: "# IPv4 local connections:"
       notify: Restart PostgreSQL
 
