@@ -1,0 +1,91 @@
+---
+- name: Bootstrap ArgoCD on Midgard
+  hosts: midgard
+  become: true
+  gather_facts: false
+  environment:
+    KUBECONFIG: /etc/rancher/k3s/k3s.yaml
+  vars:
+    argocd_chart_version: "9.5.21"
+
+  tasks:
+    # --- Disable Traefik ---
+    - name: Write K3s config to disable Traefik
+      copy:
+        dest: /etc/rancher/k3s/config.yaml
+        content: |
+          disable:
+            - traefik
+        mode: "0644"
+
+    - name: Restart K3s to apply Traefik disable
+      systemd:
+        name: k3s
+        state: restarted
+
+    - name: Wait for K3s node to become ready
+      command: k3s kubectl get nodes --no-headers
+      register: k3s_ready
+      until: k3s_ready.rc == 0 and 'Ready' in k3s_ready.stdout
+      retries: 20
+      delay: 10
+      changed_when: false
+
+    # --- Helm ---
+    - name: Install Helm
+      shell: curl -sfL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      args:
+        creates: /usr/local/bin/helm
+
+    # --- ArgoCD ---
+    - name: Add Argo Helm repo
+      command: helm repo add argo https://argoproj.github.io/argo-helm
+      register: repo_add
+      changed_when: "'already exists' not in repo_add.stdout"
+
+    - name: Update Helm repos
+      command: helm repo update
+      changed_when: false
+
+    - name: Install ArgoCD via Helm
+      command: >
+        helm upgrade --install argocd argo/argo-cd
+        --namespace argocd
+        --create-namespace
+        --version {{ argocd_chart_version }}
+
+    - name: Wait for ArgoCD pods to be ready
+      command: k3s kubectl wait pod --all -n argocd --for=condition=Ready --timeout=300s
+      register: argocd_ready
+      until: argocd_ready.rc == 0
+      retries: 5
+      delay: 15
+      changed_when: false
+
+    # --- Root Application ---
+    - name: Write infrastructure root Application manifest
+      copy:
+        dest: /tmp/argocd-root-app.yaml
+        mode: "0600"
+        content: |
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: infrastructure
+            namespace: argocd
+          spec:
+            project: default
+            source:
+              repoURL: https://github.com/mderuijter/yggdrasil.git
+              targetRevision: main
+              path: k8s/infrastructure
+            destination:
+              server: https://kubernetes.default.svc
+              namespace: argocd
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
+
+    - name: Apply infrastructure root Application
+      command: k3s kubectl apply -f /tmp/argocd-root-app.yaml
