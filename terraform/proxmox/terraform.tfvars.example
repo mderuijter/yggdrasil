@@ -1,0 +1,17 @@
+# Non-sensitive config — copy to terraform.tfvars and fill in your values.
+# Secret (proxmox_password) lives in secrets.enc.yaml (gitignored).
+# Create with: sops terraform/proxmox/secrets.enc.yaml
+proxmox_endpoint = "https://<PROXMOX_IP>:8006"
+proxmox_node     = "yggdrasil"
+
+# /32 host entry for the management workstation — must match its static DHCP reservation.
+# Never commit the real IP here; it belongs only in terraform.tfvars (gitignored).
+management_source_ip = "<SEIREITEI_IP>/32"
+
+# Two-phase apply:
+#   Phase 1 — leave as ACCEPT, run terraform apply, verify in the Proxmox UI that:
+#              - IPSet yggdrasil-mgt resolved to the correct IP
+#              - Security group yggdrasil-proxmox is attached to the node
+#              - Ports 8006 and 22 still answer from Seireitei
+#   Phase 2 — change to DROP and apply again to enforce the access restriction
+firewall_input_policy = "ACCEPT"
